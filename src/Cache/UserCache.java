@@ -2,32 +2,39 @@ package Cache;
 import java.util.HashMap;
 import java.util.Map;
 
-import TasteProfile.UserProfile;
+import Implementations.UserProfileImpl;
 
-public class UserCache implements ICache<UserProfile> {
+public class UserCache implements ICache<UserProfileImpl> {
 	
-	public Map<String,UserProfile> users;
+	public Map<String,UserProfileImpl> users;
 	public UserCache() {
-		users = new HashMap<String,UserProfile>();
+		users = new HashMap<String,UserProfileImpl>();
 	}
 
 	@Override
-	public UserProfile Get(String Id) {
+	public UserProfileImpl Get(String Id) {
 		return users.get(Id);
 	}
 
 	@Override
 	//Puts a new UserProfile Object into the Cache, determine if songs that exis
-	public UserProfile Put(String Id, UserProfile obj) {
+	public UserProfileImpl Put(String Id, UserProfileImpl obj) {
 		//Check if exists
-		if(!users.containsKey(Id)) {
+		if(users.containsKey(Id)) {
+			UserProfileImpl user = users.get(Id);
+			
+			
+			return null;
 			
 		}
-		return null;
+		else if(users.size() < 1000) {
+			return users.put(Id, obj);
+		}
+		return obj;
 	}
 
 	@Override
-	public UserProfile Delete(String Id) {
+	public UserProfileImpl Delete(String Id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
