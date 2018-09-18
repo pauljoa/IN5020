@@ -1,13 +1,9 @@
 package Cache;
-public class Cache {
 
-	public Cache() {
-		// TODO Auto-generated constructor stub
-	}
-
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
+public interface Cache<T> 
+{
+	
+	T Get(String Id);
+	T Put(String Id, T obj);
+	T Delete(String Id);
 }
