@@ -13,18 +13,21 @@ public class Servant extends ProfilerPOA {
 	@Override
 	public int getTimesPlayed(String song_id) {
 		// TODO Auto-generated method stub
+		System.out.println("getTimesPlayed - " + song_id);
 		return 0;
 	}
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
 		// TODO Auto-generated method stub
+		System.out.println("getTimesPlayedByUser - " + user_id + " - " + song_id);
 		return 0;
 	}
 
 	@Override
 	public TopThree getTopThreeUsersBySong(String song_id) {
 		// TODO Auto-generated method stub
+		System.out.println("getTopThreeUsersBySong - " + song_id);
 		return null;
 	}
 
