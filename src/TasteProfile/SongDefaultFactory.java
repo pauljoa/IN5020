@@ -1,4 +1,5 @@
 package TasteProfile;
+import Implementations.SongImpl;
 
 
 /**
