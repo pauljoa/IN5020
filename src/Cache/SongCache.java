@@ -1,29 +1,30 @@
 package Cache;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import Implementations.SongProfileImpl;
 
 public class SongCache implements ICache<SongProfileImpl> {
-
+	
+	public Map<String,SongProfileImpl> songs;
 	public SongCache() {
-		// TODO Auto-generated constructor stub
+		songs = new HashMap<>();
 	}
 
 	@Override
 	public SongProfileImpl Get(String Id) {
-		// TODO Auto-generated method stub
-		return null;
+		return songs.get(Id);
 	}
 
 	@Override
 	public SongProfileImpl Put(String Id, SongProfileImpl obj) {
-		// TODO Auto-generated method stub
-		return null;
+		return songs.put(Id, obj);
 	}
 
 	@Override
 	public SongProfileImpl Delete(String Id) {
-		// TODO Auto-generated method stub
-		return null;
+		return songs.remove(Id);
 	}
 
 }

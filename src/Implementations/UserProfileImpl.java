@@ -1,39 +1,16 @@
 package Implementations;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import TasteProfile.Song;
 import TasteProfile.UserProfile;
 
+@SuppressWarnings("serial")
 public class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl> {
-
-	
-	
 	public UserProfileImpl() {
-
-		songs = new Song[200];
 	}
-	//Inserts new songs that are not updated 
-	public Boolean UpdateSongs(Song s[]) {
-		Boolean newSong = false;
-		
-		
-		
-		
-		
-		return null;
-		
-	}
-	public Boolean UpdateSong(Song s) {
-		
-		
-		
-		
-		
-		
-		return null;
-		
+	public void Init(String id,int playCount,Song[] songs) {
+		this.id = id;
+		this.total_play_count = playCount;
+		this.songs = songs; 
 	}
 	@Override
 	public int compareTo(UserProfileImpl e2) {

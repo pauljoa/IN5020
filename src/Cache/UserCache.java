@@ -1,12 +1,8 @@
 package Cache;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
 import Implementations.UserProfileImpl;
 
 public class UserCache implements ICache<UserProfileImpl> {
@@ -14,7 +10,7 @@ public class UserCache implements ICache<UserProfileImpl> {
 	public Map<String,UserProfileImpl> users;
 	public UserProfileImpl lowest;
 	public UserCache() {
-		users = new HashMap<String,UserProfileImpl>();
+		users = new HashMap<>();
 		lowest = null;
 	}
 
@@ -48,16 +44,15 @@ public class UserCache implements ICache<UserProfileImpl> {
 	private void FindLowest() {
 		UserProfileImpl lowTmp = this.FilterMap(this.users);
 		if(lowTmp == null) {
-			//Should not happen
-			
 		}
-		this.lowest = lowTmp;
+		else {
+			this.lowest = lowTmp;
+		}
 		
 	}
 	//Filter the HashMap for the lowest total play count
 	private UserProfileImpl FilterMap(Map<String,UserProfileImpl> m) {
-		Comparator<? super Entry<String, UserProfileImpl>> comp = (e1,
-	            e2) -> e1.getValue().compareTo(e2.getValue());
+		Comparator<? super Entry<String, UserProfileImpl>> comp = (e1,e2) -> e1.getValue().compareTo(e2.getValue());
 	    UserProfileImpl tmp = (UserProfileImpl) m.entrySet().stream().min(comp).get();
 		return tmp;
 		
@@ -65,8 +60,7 @@ public class UserCache implements ICache<UserProfileImpl> {
 
 	@Override
 	public UserProfileImpl Delete(String Id) {
-		// TODO Auto-generated method stub
-		return null;
+		return this.users.remove(Id);
 	}
 
 }
