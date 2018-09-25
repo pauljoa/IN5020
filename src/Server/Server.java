@@ -21,7 +21,7 @@ public class Server {
 			ORB orb = ORB.init(args, null);
 			POA rootpoa = POAHelper.narrow(orb.resolve_initial_references("RootPOA"));
 			rootpoa.the_POAManager().activate();
-			Servant profilerImpl = new Servant();
+			Servant profilerImpl = new Servant(args[2]);
 			org.omg.CORBA.Object ref = rootpoa.servant_to_reference(profilerImpl);
 			Profiler pref = ProfilerHelper.narrow(ref);
 			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");

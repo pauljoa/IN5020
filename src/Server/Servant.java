@@ -11,14 +11,15 @@ import TasteProfile.Song;
 import TasteProfile.TopThree;
 
 public class Servant extends ProfilerPOA {
+	
+	private String filepath;
 
-	public Servant() {
-		
+	public Servant(String filepath) {
+		this.filepath = filepath;
 	}
 
 	@Override
 	public int getTimesPlayed(String song_id) {
-		String filepath = "C:\\Users\\Bruker\\Downloads\\train_triplets.txt\\train_triplets.txt";
 		String line = "";
 		int n = 0;
 		try {
@@ -41,7 +42,6 @@ public class Servant extends ProfilerPOA {
 
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
-		String filepath = "C:\\Users\\Bruker\\Downloads\\train_triplets.txt\\train_triplets.txt";
 		String line = "";
 		int n = 0;
 		try {
@@ -65,7 +65,6 @@ public class Servant extends ProfilerPOA {
 
 	@Override
 	public TopThree getTopThreeUsersBySong(String song_id) {
-		String filepath = "C:\\Users\\Bruker\\Downloads\\train_triplets.txt\\train_triplets.txt";
 		String line = "";
 		String firstKey, secondKey, thirdKey;
 		firstKey= secondKey= thirdKey = "";

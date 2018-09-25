@@ -11,7 +11,7 @@ module TasteProfile
 	{
 		public sequence< UserCounter> topThreeUsers;
 	};
-	valuetype Song 
+	valuetype Song
 	{
 		public string id;
 		public long play_count;
