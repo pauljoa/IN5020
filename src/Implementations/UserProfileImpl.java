@@ -6,7 +6,7 @@ import java.util.List;
 import TasteProfile.Song;
 import TasteProfile.UserProfile;
 
-public class UserProfileImpl extends UserProfile {
+public class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl> {
 
 	
 	
@@ -34,6 +34,16 @@ public class UserProfileImpl extends UserProfile {
 		
 		return null;
 		
+	}
+	@Override
+	public int compareTo(UserProfileImpl e2) {
+		if(this.total_play_count > e2.total_play_count) {
+			return 1;
+		}
+		else if(this.total_play_count < e2.total_play_count) {
+			return -1;
+		}
+		return 0;
 	}
 
 }
