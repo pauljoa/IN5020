@@ -9,6 +9,7 @@ import Implementations.UserCounterImpl;
 import TasteProfile.ProfilerPOA;
 import TasteProfile.Song;
 import TasteProfile.TopThree;
+import TasteProfile.UserProfile;
 
 public class Servant extends ProfilerPOA {
 	
@@ -122,6 +123,12 @@ public class Servant extends ProfilerPOA {
 
 	@Override
 	public Song getFavouriteSongByUser(String user_id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public UserProfile getUserProfile(String user_id) {
 		// TODO Auto-generated method stub
 		return null;
 	}

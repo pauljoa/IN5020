@@ -39,6 +39,7 @@ module TasteProfile
 		TopThree getTopThreeUsersBySong(in string song_id);
 		/*Returns favorite song by user id*/
 		Song getFavouriteSongByUser(in string user_id);
+		UserProfile getUserProfile(in string user_id);
 		
   	};
 };
