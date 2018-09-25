@@ -10,6 +10,7 @@ import org.omg.CosNaming.NamingContextExtHelper;
 
 import TasteProfile.Profiler;
 import TasteProfile.ProfilerHelper;
+import TasteProfile.TopThree;
 import TasteProfile._ProfilerStub;
 
 public class Client extends _ProfilerStub {
@@ -37,15 +38,21 @@ public class Client extends _ProfilerStub {
 				String method = splittedInput[0];
 				
 				if(method.equals("getTimesPlayedByUser")) {
-					profilerRef.getTimesPlayedByUser(splittedInput[1], splittedInput[2]);
+					int tpbu = profilerRef.getTimesPlayedByUser(splittedInput[1], splittedInput[2]);
+					System.out.println("Times played: " + tpbu);
 				} else if(method.equals("getTimesPlayed")) {
-					profilerRef.getTimesPlayed(splittedInput[1]);
+					int tp = profilerRef.getTimesPlayed(splittedInput[1]);
+					System.out.println("Times played: " + tp);
 				} else if(method.equals("getTopThreeUsersBySong")) {
-					profilerRef.getTopThreeUsersBySong(splittedInput[1]);
+					TopThree tt = profilerRef.getTopThreeUsersBySong(splittedInput[1]);
+					System.out.println(tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time);
+					System.out.println(tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time);
+					System.out.println(tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time);
 				} else {
 					throw new Error("Illegal method name in input");
 				}
 			}
+			br.close();
 		} catch (Exception e) {
 			System.out.println("Client Error: " + e.getMessage());
 			e.printStackTrace(System.out);

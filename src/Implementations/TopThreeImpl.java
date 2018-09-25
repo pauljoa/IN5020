@@ -4,8 +4,12 @@ import TasteProfile.TopThree;
 
 public class TopThreeImpl extends TopThree {
 
-	public TopThreeImpl(UserCounterImpl topThreeUsers[]) {
-		 this.topThreeUsers = topThreeUsers;
+	public TopThreeImpl() {
+		
+	}
+	
+	public void setTopThreeUsers(UserCounterImpl[] topThreeUsers) {
+		this.topThreeUsers = topThreeUsers;
 	}
 
 }
