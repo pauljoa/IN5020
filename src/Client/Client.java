@@ -24,26 +24,26 @@ public class Client extends _ProfilerStub {
 	public Client() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	
-	//USAGE: args  "-ORBInitialPort (Port) <Full path to input file> <Full path to output file (including name of file with extension)> 
-	//<Integer value to decide if cache is to be used on client or not (0 = cache off. 1 = cache on)>"
+
+	// USAGE: args "-ORBInitialPort (Port) <Full path to input file> <Full path to
+	// output file (including name of file with extension)>
+	// <Integer value to decide if cache is to be used on client or not (0 = cache
+	// off. 1 = cache on)>"
 	public static void main(String[] args) {
 		try {
-			
-			//Initiating ORB
+
+			// Initiating ORB
 			ORB orb = ORB.init(args, null);
 			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
 			String name = "Profiler";
 			Profiler profilerRef = ProfilerHelper.narrow(ncRef.resolve_str(name));
 
-			
-			//Initiating Cache
+			// Initiating Cache
 			boolean useCache = Integer.parseInt(args[4]) != 0;
 			UserCache uCache = new UserCache();
-			
-			//Initiating IO
+
+			// Initiating IO
 			String fileLocation = args[2];
 			File file = new File(fileLocation);
 			BufferedReader br = new BufferedReader(new FileReader(file));
@@ -54,10 +54,9 @@ public class Client extends _ProfilerStub {
 			long startTime = System.nanoTime();
 			String st;
 
-			//Main read loop
-			while((st = br.readLine()) != null) {
-				System.out.println(st);
-				outputWriter.println(st);
+			// Main read loop
+			while ((st = br.readLine()) != null) {
+
 				String[] splittedInput = st.split("\\t");
 				String method = splittedInput[0];
 
@@ -83,32 +82,48 @@ public class Client extends _ProfilerStub {
 					} else {
 						tpbu = profilerRef.getTimesPlayedByUser(splittedInput[1], splittedInput[2]);
 					}
+					Thread.sleep(80);
 					long elapsedTime = System.nanoTime() - localTime;
+					Math.floor(elapsedTime);
 					double elapsedMs = elapsedTime / 1000000.0;
-					System.out.println("Times played: " + tpbu + " (" + elapsedMs + ")");
-					outputWriter.println("Times played: " + tpbu + " (" + elapsedMs + ")");
+					System.out.println("Song " + splittedInput[2] + " played " + tpbu + " times by user "
+							+ splittedInput[1] + ". (" + (int) Math.ceil(elapsedMs) + " ms)");
+					outputWriter.println("Song " + splittedInput[2] + " played " + tpbu + " times by user "
+							+ splittedInput[1] + ". (" + (int) Math.ceil(elapsedMs) + " ms)");
 				} else if (method.equals("getTimesPlayed")) {
 					long localTime = System.nanoTime();
 					int tp = profilerRef.getTimesPlayed(splittedInput[1]);
+					Thread.sleep(80);
 					long elapsedTime = System.nanoTime() - localTime;
 					double elapsedMs = elapsedTime / 1000000.0;
-					System.out.println("Times played: " + tp + " (" + elapsedMs + ")");
-					outputWriter.println("Times played: " + tp + " (" + elapsedMs + ")");
+					System.out.println("Song " + splittedInput[1] + " played " + tp + " times. ("
+							+ (int) Math.ceil(elapsedMs) + " ms)");
+					outputWriter.println("Song " + splittedInput[1] + " played " + tp + " times. ("
+							+ (int) Math.ceil(elapsedMs) + " ms)");
 				} else if (method.equals("getTopThreeUsersBySong")) {
 					long localTime = System.nanoTime();
 					TopThree tt = profilerRef.getTopThreeUsersBySong(splittedInput[1]);
+					Thread.sleep(80);
 					long elapsedTime = System.nanoTime() - localTime;
 					double elapsedMs = elapsedTime / 1000000.0;
 					if (tt.topThreeUsers[0] == null)
 						System.out.println("tt = null");
-					System.out.println(tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time);
-					System.out.println(tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time);
-					System.out.println(tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time);
-					System.out.println("Elapsed time: " + elapsedMs);
-					outputWriter.println(tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time);
-					outputWriter.println(tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time);
-					outputWriter.println(tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time);
-					outputWriter.println("Elapsed time: " + elapsedMs);
+					System.out.println("Top three users that played this song the most: "+splittedInput[1]);
+					System.out.println(
+							tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time + " times.");
+					System.out.println(
+							tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time + " times.");
+					System.out.println(
+							tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time + " times.");
+					System.out.println("Elapsed time: " + (int) Math.ceil(elapsedMs) + "ms");
+					outputWriter.println(splittedInput[1]);
+					outputWriter.println(
+							tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time + " times.");
+					outputWriter.println(
+							tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time + " times.");
+					outputWriter.println(
+							tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time + " times.");
+					outputWriter.println("Elapsed time: " + (int) Math.ceil(elapsedMs) + "ms");
 				} else {
 					br.close();
 					outputWriter.close();
@@ -117,8 +132,8 @@ public class Client extends _ProfilerStub {
 			}
 			long elapsedTime = System.nanoTime() - startTime;
 			double elapsedMs = elapsedTime / 1000000.0;
-			System.out.println("Elapsed time: " + elapsedMs);
-			outputWriter.println("Elapsed time: " + elapsedMs);
+			System.out.println("Total elapsed time: " + elapsedMs);
+			outputWriter.println("Total elapsed time: " + elapsedMs);
 			br.close();
 			outputWriter.close();
 		} catch (Exception e) {
