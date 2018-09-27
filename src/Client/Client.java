@@ -24,18 +24,25 @@ public class Client extends _ProfilerStub {
 	public Client() {
 		// TODO Auto-generated constructor stub
 	}
-
+	
+	
+	//USAGE: args  "-ORBInitialPort (Port) <Full path to input file> <Full path to output file (including name of file with extension)> 
+	//<Integer value to decide if cache is to be used on client or not (0 = cache off. 1 = cache on)>"
 	public static void main(String[] args) {
 		try {
+			
+			//Initiating ORB
 			ORB orb = ORB.init(args, null);
 			org.omg.CORBA.Object objRef = orb.resolve_initial_references("NameService");
 			NamingContextExt ncRef = NamingContextExtHelper.narrow(objRef);
 			String name = "Profiler";
 			Profiler profilerRef = ProfilerHelper.narrow(ncRef.resolve_str(name));
 			
+			//Initiating Cache
 			boolean useCache = Integer.parseInt(args[4]) != 0;
 			UserCache uCache = new UserCache();
 			
+			//Initiating IO
 			String fileLocation = args[2];
 			File file = new File(fileLocation);
 			BufferedReader br = new BufferedReader(new FileReader(file));
@@ -45,6 +52,8 @@ public class Client extends _ProfilerStub {
 			
 			long startTime = System.nanoTime();
 			String st;
+			
+			//Main read loop
 			while((st = br.readLine()) != null) {
 				System.out.println(st);
 				outputWriter.println(st);
