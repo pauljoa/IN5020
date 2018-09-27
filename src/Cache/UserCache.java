@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import Implementations.UserProfileImpl;
 
+/**
+ * 	The UserCache class implements the ICache interface to provide GET PUT DELETE methods for caching of UserProfiles
+ *
+ */
 public class UserCache implements ICache<UserProfileImpl> {
 	
 	public Map<String,UserProfileImpl> users;
@@ -14,6 +18,9 @@ public class UserCache implements ICache<UserProfileImpl> {
 		lowest = null;
 	}
 
+	/* (non-Javadoc)
+	 * @see Cache.ICache#Get(java.lang.String)
+	 */
 	@Override
 	public UserProfileImpl Get(String Id) {
 		return users.get(Id);
@@ -41,6 +48,9 @@ public class UserCache implements ICache<UserProfileImpl> {
 			return user;
 		}
 	}
+	/**
+	 * Finds the lowest amount of playCounts in the user cache and sets the new lowest user
+	 */
 	private void FindLowest() {
 		UserProfileImpl lowTmp = this.FilterMap(this.users);
 		if(lowTmp == null) {
@@ -50,7 +60,11 @@ public class UserCache implements ICache<UserProfileImpl> {
 		}
 		
 	}
-	//Filter the HashMap for the lowest total play count
+
+	/**
+	 * @param m the map to be filtered
+	 * @return Returns the lowest playCount user in the cache, else returns null
+	 */
 	private UserProfileImpl FilterMap(Map<String,UserProfileImpl> m) {
 		Comparator<? super Entry<String, UserProfileImpl>> comp = (e1,e2) -> e1.getValue().compareTo(e2.getValue());
 	    UserProfileImpl tmp = (UserProfileImpl) m.entrySet().stream().min(comp).get().getValue();
@@ -58,6 +72,9 @@ public class UserCache implements ICache<UserProfileImpl> {
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see Cache.ICache#Delete(java.lang.String)
+	 */
 	@Override
 	public UserProfileImpl Delete(String Id) {
 		return this.users.remove(Id);
