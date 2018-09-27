@@ -24,6 +24,10 @@ public class Servant extends ProfilerPOA {
 	private UserCache userCache;
 	private boolean cache;
 
+	/**
+	 * @param filepath Path to file with data
+	 * @param cache boolean value to set if cache is to be used
+	 */
 	public Servant(String filepath, boolean cache) {
 		this.filepath = filepath;
 		if (cache) {
@@ -33,6 +37,9 @@ public class Servant extends ProfilerPOA {
 		System.out.println("CachInit finished");
 	}
 
+	/**
+	 * Initiating all caches used by the servant
+	 */
 	private void initCache() {
 		this.songCache = new SongCache();
 		this.userCache = new UserCache();
@@ -113,6 +120,9 @@ public class Servant extends ProfilerPOA {
 		}
 	}
 
+	/* 
+	 * @see TasteProfile.ProfilerOperations#getTimesPlayed(java.lang.String)
+	 */
 	@Override
 	public int getTimesPlayed(String song_id) {
 		if(cache) {
@@ -144,6 +154,9 @@ public class Servant extends ProfilerPOA {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see TasteProfile.ProfilerOperations#getTimesPlayedByUser(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public int getTimesPlayedByUser(String user_id, String song_id) {
 		System.out.println("getTimesPlayedByUser - " + song_id + " - " + user_id);
@@ -180,6 +193,9 @@ public class Servant extends ProfilerPOA {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see TasteProfile.ProfilerOperations#getTopThreeUsersBySong(java.lang.String)
+	 */
 	@Override
 	public TopThree getTopThreeUsersBySong(String song_id) {
 		System.out.println("getTopThreeUsersBySong - " + song_id);
@@ -250,12 +266,18 @@ public class Servant extends ProfilerPOA {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see TasteProfile.ProfilerOperations#getFavouriteSongByUser(java.lang.String)
+	 */
 	@Override
 	public Song getFavouriteSongByUser(String user_id) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/* (non-Javadoc)
+	 * @see TasteProfile.ProfilerOperations#getUserProfile(java.lang.String)
+	 */
 	@Override
 	public UserProfile getUserProfile(String user_id) {
 		if(cache && userCache.Get(user_id) != null) {
