@@ -53,7 +53,7 @@ public class UserCache implements ICache<UserProfileImpl> {
 	//Filter the HashMap for the lowest total play count
 	private UserProfileImpl FilterMap(Map<String,UserProfileImpl> m) {
 		Comparator<? super Entry<String, UserProfileImpl>> comp = (e1,e2) -> e1.getValue().compareTo(e2.getValue());
-	    UserProfileImpl tmp = (UserProfileImpl) m.entrySet().stream().min(comp).get();
+	    UserProfileImpl tmp = (UserProfileImpl) m.entrySet().stream().min(comp).get().getValue();
 		return tmp;
 		
 	}

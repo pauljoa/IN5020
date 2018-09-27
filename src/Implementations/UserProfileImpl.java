@@ -6,6 +6,9 @@ import TasteProfile.UserProfile;
 @SuppressWarnings("serial")
 public class UserProfileImpl extends UserProfile implements Comparable<UserProfileImpl> {
 	public UserProfileImpl() {
+		this.id = "";
+		this.total_play_count = 0;
+		this.songs = new Song[0];
 	}
 	public void Init(String id,int playCount,Song[] songs) {
 		this.id = id;

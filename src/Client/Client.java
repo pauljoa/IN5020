@@ -43,6 +43,7 @@ public class Client extends _ProfilerStub {
 			String outputLocation = args[3];
 			PrintWriter outputWriter = new PrintWriter(new BufferedWriter(new FileWriter(outputLocation, true)));
 			
+			long startTime = System.nanoTime();
 			String st;
 			while((st = br.readLine()) != null) {
 				System.out.println(st);
@@ -79,6 +80,8 @@ public class Client extends _ProfilerStub {
 					outputWriter.println("Times played: " + tp);
 				} else if(method.equals("getTopThreeUsersBySong")) {
 					TopThree tt = profilerRef.getTopThreeUsersBySong(splittedInput[1]);
+					if(tt.topThreeUsers[0] == null)
+						System.out.println("tt = null");
 					System.out.println(tt.topThreeUsers[0].user_id + " - " + tt.topThreeUsers[0].songid_play_time);
 					System.out.println(tt.topThreeUsers[1].user_id + " - " + tt.topThreeUsers[1].songid_play_time);
 					System.out.println(tt.topThreeUsers[2].user_id + " - " + tt.topThreeUsers[2].songid_play_time);
@@ -91,6 +94,10 @@ public class Client extends _ProfilerStub {
 					throw new Error("Illegal method name in input");
 				}
 			}
+			long elapsedTime = System.nanoTime() - startTime;
+			double elapsedMs = elapsedTime / 1000000.0;
+			System.out.println("Elapsed time: " + elapsedMs);
+			outputWriter.println("Elapsed time: " + elapsedMs);
 			br.close();
 			outputWriter.close();
 		} catch (Exception e) {
