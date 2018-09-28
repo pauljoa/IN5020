@@ -1,0 +1,15 @@
+SOGPBAW12A6D4F9F22
+59a2127cd8d3f7d6a5195114f039ce8181a1f462 - 113 times.
+1e997e93ed3bd2ea0afc7069542163e379feec23 - 103 times.
+6ed1cd848678d774e0c46f76d0cbbe45e7e6b4cd - 95 times.
+Elapsed time: 85 ms
+SOJHZAX12AB017E5D2
+afe1f9de0b484c95e6efd871bd259d32d9447e86 - 205 times.
+7ac8902a88b3a40b3ba57f3ea5d86bae34365eeb - 172 times.
+40122d19a4b1cd40cad6d4e890eaa287e4b66d93 - 166 times.
+Elapsed time: 82 ms
+SOREVDG12A67ADA096
+2da92d5ef20c65b6a0621ad16acc9e85f47e1270 - 58 times.
+12c30297267ab44a59d567d60081da48ce700bf3 - 54 times.
+61c528d7a8e6fd63175c880c82b35c9baf864fd7 - 32 times.
+Elapsed time: 83 ms
