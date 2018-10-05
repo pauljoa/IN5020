@@ -1,8 +1,15 @@
 package client;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class Client implements IClient {
+	public double balance = 0;
+	public List<Transaction> executed_list = new ArrayList<Transaction>();
+	public Collection<Transaction> outstanding_collection = new ArrayList<Transaction>();
+	public int order_counter = 0;
+	public int outstanding_counter = 0;
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -10,20 +17,19 @@ public class Client implements IClient {
 	}
 
 	@Override
-	public int balance() {
-		// TODO Auto-generated method stub
-		return 0;
+	public double balance() {
+		return balance;
 	}
 
 	@Override
 	public void deposit(int amount) {
-		// TODO Auto-generated method stub
+		balance += amount;
 		
 	}
 
 	@Override
-	public void addIntersest(int percent) {
-		// TODO Auto-generated method stub
+	public void addInterest(double percent) {
+		balance = balance*(1+(percent/100));
 		
 	}
 
@@ -35,8 +41,7 @@ public class Client implements IClient {
 
 	@Override
 	public void cleanHistory() {
-		// TODO Auto-generated method stub
-		
+		executed_list.clear();
 	}
 
 	@Override
@@ -47,20 +52,24 @@ public class Client implements IClient {
 
 	@Override
 	public void sleep(int duration) {
-		// TODO Auto-generated method stub
+		try {
+			Thread.sleep(duration);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 	}
 
 	@Override
 	public void exit() {
-		// TODO Auto-generated method stub
-		
+		exit();
 	}
 
 	@Override
 	public void addTransaction(Transaction transaction) {
-		// TODO Auto-generated method stub
-		
+		outstanding_collection.add(transaction);
+		outstanding_counter++;
 	}
 
 	@Override

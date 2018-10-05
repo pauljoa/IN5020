@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface IClient {
 	
-	public int balance();
+	public double balance();
 	public void deposit(int amount);
-	public void addIntersest(int percent);
+	public void addInterest(double percent);
 	public List<Transaction> getHistory();
 	public void cleanHistory();
 	public List<String> memberInfo();
