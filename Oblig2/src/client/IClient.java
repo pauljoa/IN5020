@@ -12,4 +12,7 @@ public interface IClient {
 	public List<String> memberInfo();
 	public void sleep(int duration);
 	public void exit();
+	
+	public void addTransaction(Transaction transaction);
+	public void processTransactions(List<Transaction> transactions);
 }
