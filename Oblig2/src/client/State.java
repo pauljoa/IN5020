@@ -5,5 +5,6 @@ public enum State {
 	Awaiting,
 	Running,
 	Sending,
-	Receiving
+	Receiving,
+	Exiting
 }

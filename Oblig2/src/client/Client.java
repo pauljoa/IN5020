@@ -16,15 +16,20 @@ public class Client implements IClient, AdvancedMessageListener {
 	public Collection<Transaction> outstanding_collection = new ArrayList<Transaction>();
 	public int order_counter = 0;
 	public int outstanding_counter = 0;
-	public static State state;
+	public State state;
 	public int numberOfMembers = 0;
 	public UUID privateName = UUID.randomUUID();
 	
 	public SpreadConnection connection;
-	public static void main(String[] args) {
-		state = State.Connecting;
-		
 
+	public Client(String[] args) {
+		state = State.Connecting;
+		Connect(args);
+		state = State.Running;
+		//Main loop, after connection has been made
+		while(state != State.Exiting) {
+			
+		}
 	}
 
 	@Override
@@ -74,6 +79,7 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void exit() {
+		state = State.Exiting;
 		System.exit(0);
 	}
 
