@@ -20,17 +20,24 @@ public class Client implements IClient, AdvancedMessageListener {
 	public Collection<Transaction> outstanding_collection = new ArrayList<Transaction>();
 	public int order_counter = 0;
 	public int outstanding_counter = 0;
-	public static State state;
+	public State state;
 	public int numberOfMembers = 0;
 	public UUID privateName = UUID.randomUUID();
 	public SpreadConnection connection;
 	public SpreadGroup group;
 	public int port = 8080;
-	
-	public static void main(String[] args) {
-		state = State.Connecting;
-		
 
+	public Client(String[] args) {
+		state = State.Connecting;
+		Connect(args);
+		state = State.Running;
+		//Main loop, after connection has been made
+		while(state != State.Exiting) {
+			
+		}
+		Disconnect();
+		System.out.println("Exiting");
+		return;
 	}
 
 	@Override
@@ -80,7 +87,7 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void exit() {
-		System.exit(0);
+		state = State.Exiting;
 	}
 
 	@Override
@@ -129,6 +136,19 @@ public class Client implements IClient, AdvancedMessageListener {
 			System.out.println("Number of replicas from args is not an Integer: " + nfe.getMessage());
 			nfe.printStackTrace(System.out);
 		}
+	}
+
+	@Override
+	public void Disconnect() {
+		System.out.println("Disconnecting");
+		try {
+			connection.disconnect();
+		} catch (SpreadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Disconnection complete");
+		
 	}
 
 }
