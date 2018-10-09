@@ -15,4 +15,9 @@ public interface IClient {
 	
 	public void addTransaction(Transaction transaction);
 	public void processTransactions(List<Transaction> transactions);
+	
+	
+	//Utility functions
+	public void Connect(String[] args);
+	
 }
