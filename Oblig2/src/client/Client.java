@@ -8,6 +8,7 @@ import java.util.UUID;
 import spread.AdvancedMessageListener;
 import spread.MembershipInfo;
 import spread.SpreadConnection;
+import spread.SpreadException;
 import spread.SpreadMessage;
 
 public class Client implements IClient, AdvancedMessageListener {
@@ -30,6 +31,9 @@ public class Client implements IClient, AdvancedMessageListener {
 		while(state != State.Exiting) {
 			
 		}
+		Disconnect();
+		System.out.println("Exiting");
+		return;
 	}
 
 	@Override
@@ -80,7 +84,6 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void exit() {
 		state = State.Exiting;
-		System.exit(0);
 	}
 
 	@Override
@@ -111,6 +114,19 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void Connect(String[] args) {
 		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void Disconnect() {
+		System.out.println("Disconnecting");
+		try {
+			connection.disconnect();
+		} catch (SpreadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		System.out.println("Disconnection complete");
 		
 	}
 
