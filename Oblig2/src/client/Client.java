@@ -20,19 +20,21 @@ public class Client implements IClient, AdvancedMessageListener {
 	public Collection<Transaction> outstanding_collection = new ArrayList<Transaction>();
 	public int order_counter = 0;
 	public int outstanding_counter = 0;
-	public State state;
+	public client.State state;
 	public int numberOfMembers = 0;
 	public UUID privateName = UUID.randomUUID();
 	public SpreadConnection connection;
 	public SpreadGroup group;
 	public int port = 8080;
-
+	public List<String> groupMembers;
+	
 	public Client(String[] args) {
-		state = State.Connecting;
+		groupMembers = new ArrayList<String>();
+		state = client.State.Connecting;
 		Connect(args);
-		state = State.Running;
+		state = client.State.Running;
 		//Main loop, after connection has been made
-		while(state != State.Exiting) {
+		while(state != client.State.Exiting) {
 			
 		}
 		Disconnect();
@@ -48,7 +50,6 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void deposit(int amount) {
 		balance += amount;
-		
 	}
 
 	@Override
@@ -70,8 +71,7 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public List<String> memberInfo() {
-		// TODO Auto-generated method stub
-		return null;
+		return groupMembers;
 	}
 
 	@Override
@@ -82,12 +82,11 @@ public class Client implements IClient, AdvancedMessageListener {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 	}
 
 	@Override
 	public void exit() {
-		state = State.Exiting;
+		state = client.State.Exiting;
 	}
 
 	@Override
@@ -104,8 +103,12 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
-		// TODO Auto-generated method stub
+	 if(message.getServiceType() == 0x00040000) {
 		
+			groupMembers.remove(message.getSender().toString());
+			numberOfMembers = numberOfMembers - 1;
+		}
+	
 	}
 
 	@Override
@@ -121,11 +124,13 @@ public class Client implements IClient, AdvancedMessageListener {
 		try {
 			connection = new SpreadConnection();
 			connection.connect(InetAddress.getByName(args[0]), port, privateName.toString(), false, false);
+			connection.add(this);
 			group = new SpreadGroup();
 			group.join(connection, args[1]);
 			
 			int nReplicas = Integer.parseInt(args[2]);
 			while(numberOfMembers < nReplicas) {}
+			
 		} catch(SpreadException se) {
 			System.out.println("Error on Spread connection: " + se.getMessage());
 			se.printStackTrace(System.out);
@@ -150,5 +155,4 @@ public class Client implements IClient, AdvancedMessageListener {
 		System.out.println("Disconnection complete");
 		
 	}
-
 }
