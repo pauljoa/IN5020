@@ -7,5 +7,7 @@ public class Transaction {
 		command = c;
 		unique_id = id;
 	}
-
+	public String toString() {
+		return command +unique_id;
+	}
 }

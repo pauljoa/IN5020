@@ -1,12 +1,17 @@
 package client;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Scanner;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import spread.AdvancedMessageListener;
 import spread.MembershipInfo;
@@ -28,20 +33,21 @@ public class Client implements IClient, AdvancedMessageListener {
 	public SpreadGroup group;
 	public int port = 8080;
 	public List<SpreadGroup> groupMembers;
-	
+	ArrayList<String> toDoList = new ArrayList<String>();
+
 	public Client(String[] args) {
 		groupMembers = new ArrayList<SpreadGroup>();
 		state = State.Connecting;
 		Connect(args);
 		state = State.Running;
-		//Main loop, after connection has been made
-		while(state != State.Exiting) {
-			
-			//Input function
-			
-			//Send function
-			
-			
+		// Main loop, after connection has been made
+		while (state != State.Exiting) {
+			Input();
+			Send();
+			// Input function
+
+			// Send function
+
 		}
 		Disconnect();
 		System.out.println("Exiting");
@@ -60,8 +66,8 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void addInterest(double percent) {
-		balance = balance*(1+(percent/100));
-		
+		balance = balance * (1 + (percent / 100));
+
 	}
 
 	@Override
@@ -104,34 +110,35 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void processTransactions(List<Transaction> transactions) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
-	 
+
 		String val = new String(message.getData());
+		System.out.println(val);
 		int tmp = 10;
 	}
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage message) {
-		
+		System.out.println("membership recieved");
 		MembershipInfo info = message.getMembershipInfo();
 		int length = info.getMembers().length;
-		//adds the new member to the group, including this replica
-		if(info.isCausedByJoin()) {
+		// adds the new member to the group, including this replica
+		if (info.isCausedByJoin()) {
 			SpreadGroup joined = info.getJoined();
 			groupMembers.add(joined);
-			//Check if the joined member is itself, TODO: Remove ! for testing purposes
-			if(connection.getPrivateGroup().equals(joined)) {
-				//Do nothing, as a state update will be sent by the other replicas (If available)
-			}
-			else {
-				//Client has executed transactions, send the state to the joined member
-				if(order_counter != 0) {
+			// Check if the joined member is itself, TODO: Remove ! for testing purposes
+			if (connection.getPrivateGroup().equals(joined)) {
+				// Do nothing, as a state update will be sent by the other replicas (If
+				// available)
+			} else {
+				// Client has executed transactions, send the state to the joined member
+				if (order_counter != 0) {
 					SpreadMessage msg = new SpreadMessage();
-					byte[] data = new String("State "+Double.toString(balance)).getBytes();
+					byte[] data = new String("State " + Double.toString(balance)).getBytes();
 					msg.setData(data);
 					msg.setSafe();
 					msg.addGroup(joined);
@@ -143,13 +150,12 @@ public class Client implements IClient, AdvancedMessageListener {
 					}
 				}
 			}
-		}
-		else if(info.isCausedByLeave() ||info.isCausedByDisconnect()) {
+		} else if (info.isCausedByLeave() || info.isCausedByDisconnect()) {
 			SpreadGroup left = info.getLeft();
 			groupMembers.remove(left);
 		}
 		this.numberOfMembers = length;
-		//Check for new member;
+		System.out.println("members: " + numberOfMembers);
 	}
 
 	@Override
@@ -163,18 +169,17 @@ public class Client implements IClient, AdvancedMessageListener {
 			group = new SpreadGroup();
 			group.join(connection, args[1]);
 			int nReplicas = Integer.parseInt(args[2]);
-			//Do nothing before start
-			while(numberOfMembers < nReplicas) {
-				
+			// Do nothing before start
+			while (numberOfMembers < nReplicas) {
+				System.out.println(numberOfMembers + "  " + nReplicas);
 			}
-			
-		} catch(SpreadException se) {
+		} catch (SpreadException se) {
 			System.out.println("Error on Spread connection: " + se.getMessage());
 			se.printStackTrace(System.out);
-		} catch(UnknownHostException uhe) {
+		} catch (UnknownHostException uhe) {
 			System.out.println("Error on group join: " + uhe.getMessage());
 			uhe.printStackTrace(System.out);
-		} catch(NumberFormatException nfe) {
+		} catch (NumberFormatException nfe) {
 			System.out.println("Number of replicas from args is not an Integer: " + nfe.getMessage());
 			nfe.printStackTrace(System.out);
 		}
@@ -190,18 +195,44 @@ public class Client implements IClient, AdvancedMessageListener {
 			e.printStackTrace();
 		}
 		System.out.println("Disconnection complete");
-		
+
 	}
 
 	@Override
 	public void Input() {
-		// TODO Auto-generated method stub
-		
+		InputStreamReader fileInputStream = new InputStreamReader(System.in);
+		BufferedReader bufferedReader = new BufferedReader(fileInputStream);
+		int time = (int) System.currentTimeMillis() + 10000; // set to + 10 seconds
+		System.out.println("gått 10 sec");
+		try {
+			while ((int) System.currentTimeMillis() < time) {
+				if (bufferedReader.ready()) {
+					System.out.println("ready input");
+					String input = bufferedReader.readLine();
+					addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+				}
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@Override
 	public void Send() {
-		// TODO Auto-generated method stub
-		
+		String data = "";
+		SpreadMessage msg = new SpreadMessage();
+		msg.setServiceType(0x00000020);
+		msg.addGroup(this.group);
+		try {
+			for (Transaction e : outstanding_collection) {
+				data = data + e.toString() + ",";
+			}
+		msg.setData(data.getBytes());	
+		connection.multicast(msg);
+		} catch (SpreadException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

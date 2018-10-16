@@ -1,6 +1,7 @@
 package client;
 
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 import spread.SpreadException;
 import spread.SpreadMessage;
@@ -13,11 +14,6 @@ public class ThreadScanner extends Thread {
 		this.client = client;
 	}
 	public void run() {
-		Scanner scanner = new Scanner(System.in);
-		String input;
-		while(true) {
-			input = scanner.nextLine();
-			client.addTransaction(new Transaction("test", "testete"));
-		}
+	
 	}
 }
