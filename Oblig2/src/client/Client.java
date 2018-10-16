@@ -60,14 +60,13 @@ public class Client implements IClient, AdvancedMessageListener {
 	}
 
 	@Override
-	public void deposit(int amount) {
+	public void deposit(double amount) {
 		balance += amount;
 	}
 
 	@Override
 	public void addInterest(double percent) {
 		balance = balance * (1 + (percent / 100));
-
 	}
 
 	@Override
@@ -109,7 +108,34 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void processTransactions(List<Transaction> transactions) {
-		// TODO Auto-generated method stub
+		for(Transaction t :transactions) {
+			//Command already executed, ignore duplicate
+			if(executed_list.contains(t)) {
+				
+			}
+			//Execute command
+			else {
+				String cmd = t.command.split("\\s+")[0];
+				String param = t.command.split("\\s+")[1];
+				switch(cmd) {
+					case "deposit":
+						deposit(Double.parseDouble(param));
+						if(outstanding_collection.remove(t)) {
+							//Was a local command, removed from the outstanding_collection
+						}
+						executed_list.add(t);
+						break;
+					case "addinterest":
+						addInterest(Double.parseDouble(param));
+						if(outstanding_collection.remove(t)) {
+							//Was a local command, removed from the outstanding_collection
+						}
+						executed_list.add(t);
+						break;
+				}
+				
+			}
+		}
 
 	}
 
@@ -123,7 +149,7 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage message) {
-		System.out.println("membership recieved");
+		System.out.println("membership received");
 		MembershipInfo info = message.getMembershipInfo();
 		int length = info.getMembers().length;
 		// adds the new member to the group, including this replica
