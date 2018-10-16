@@ -20,5 +20,7 @@ public interface IClient {
 	//Utility functions
 	public void Connect(String[] args);
 	public void Disconnect();
+	public void Input();
+	public void Send();
 	
 }
