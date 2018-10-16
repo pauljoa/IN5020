@@ -137,7 +137,7 @@ public class Client implements IClient, AdvancedMessageListener {
 		try {
 			InetAddress tmp = InetAddress.getByName(args[0]);
 			connection = new SpreadConnection();
-			connection.connect(InetAddress.getByName(args[0]), port, privateName.toString(), false, false);
+			connection.connect(InetAddress.getByName(args[0]), port, privateName.toString(), false, true);
 			connection.add(this);
 			group = new SpreadGroup();
 			group.join(connection, args[1]);
