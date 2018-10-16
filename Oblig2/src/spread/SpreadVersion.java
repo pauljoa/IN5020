@@ -18,7 +18,7 @@
  * The Creators of Spread are:
  *  Yair Amir, Michal Miskin-Amir, Jonathan Stanton, John Schultz.
  *
- *  Copyright (C) 1993-2016 Spread Concepts LLC <info@spreadconcepts.com>
+ *  Copyright (C) 1993-2014 Spread Concepts LLC <info@spreadconcepts.com>
  *
  *  All Rights Reserved.
  *
@@ -43,15 +43,15 @@ public class SpreadVersion
 {
 	// The major version.
 	/////////////////////
-	private int majorVersion = 5;
+	private int majorVersion = 3;
 	
 	// The minor version.
 	/////////////////////
-	private int minorVersion = 0;
+	private int minorVersion = 16;
 
 	// The patch version.
 	/////////////////////
-	private int patchVersion = 0;
+	private int patchVersion = 1;
 	
 	// Get the spread version.
 	//////////////////////////
