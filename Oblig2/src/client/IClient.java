@@ -2,6 +2,8 @@ package client;
 
 import java.util.List;
 
+import spread.SpreadGroup;
+
 public interface IClient {
 	
 	public double balance();
@@ -9,7 +11,7 @@ public interface IClient {
 	public void addInterest(double percent);
 	public List<Transaction> getHistory();
 	public void cleanHistory();
-	public List<String> memberInfo();
+	public List<SpreadGroup> memberInfo();
 	public void sleep(int duration);
 	public void exit();
 	

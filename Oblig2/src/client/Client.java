@@ -27,10 +27,10 @@ public class Client implements IClient, AdvancedMessageListener {
 	public SpreadConnection connection;
 	public SpreadGroup group;
 	public int port = 8080;
-	public List<String> groupMembers;
+	public List<SpreadGroup> groupMembers;
 	
 	public Client(String[] args) {
-		groupMembers = new ArrayList<String>();
+		groupMembers = new ArrayList<SpreadGroup>();
 		state = State.Connecting;
 		Connect(args);
 		state = State.Running;
@@ -76,7 +76,7 @@ public class Client implements IClient, AdvancedMessageListener {
 	}
 
 	@Override
-	public List<String> memberInfo() {
+	public List<SpreadGroup> memberInfo() {
 		return groupMembers;
 	}
 
@@ -110,11 +110,8 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
 	 
-		if(message.getServiceType() == 0x00040000) {
-		
-			groupMembers.remove(message.getSender().toString());
-			numberOfMembers = numberOfMembers - 1;
-		}
+		String val = new String(message.getData());
+		int tmp = 10;
 	}
 
 	@Override
@@ -122,11 +119,35 @@ public class Client implements IClient, AdvancedMessageListener {
 		
 		MembershipInfo info = message.getMembershipInfo();
 		int length = info.getMembers().length;
-		//New member
-		if(length > numberOfMembers) {
-			
+		//adds the new member to the group, including this replica
+		if(info.isCausedByJoin()) {
+			SpreadGroup joined = info.getJoined();
+			groupMembers.add(joined);
+			//Check if the joined member is itself, TODO: Remove ! for testing purposes
+			if(connection.getPrivateGroup().equals(joined)) {
+				//Do nothing, as a state update will be sent by the other replicas (If available)
+			}
+			else {
+				//Client has executed transactions, send the state to the joined member
+				if(order_counter != 0) {
+					SpreadMessage msg = new SpreadMessage();
+					byte[] data = new String("State "+Double.toString(balance)).getBytes();
+					msg.setData(data);
+					msg.setSafe();
+					msg.addGroup(joined);
+					try {
+						connection.multicast(msg);
+					} catch (SpreadException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
 		}
-		
+		else if(info.isCausedByLeave() ||info.isCausedByDisconnect()) {
+			SpreadGroup left = info.getLeft();
+			groupMembers.remove(left);
+		}
 		this.numberOfMembers = length;
 		//Check for new member;
 	}
