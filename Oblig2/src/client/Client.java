@@ -118,32 +118,32 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void processTransactions(List<Transaction> transactions) {
-		for(Transaction t :transactions) {
-			//Command already executed, ignore duplicate
-			if(executed_list.contains(t)) {
-				
+		for (Transaction t : transactions) {
+			// Command already executed, ignore duplicate
+			if (executed_list.contains(t)) {
+
 			}
-			//Execute command
+			// Execute command
 			else {
 				String cmd = t.command.split("\\s+")[0];
 				String param = t.command.split("\\s+")[1];
-				switch(cmd) {
-					case "deposit":
-						deposit(Double.parseDouble(param));
-						if(outstanding_collection.remove(t)) {
-							//Was a local command, removed from the outstanding_collection
-						}
-						executed_list.add(t);
-						break;
-					case "addinterest":
-						addInterest(Double.parseDouble(param));
-						if(outstanding_collection.remove(t)) {
-							//Was a local command, removed from the outstanding_collection
-						}
-						executed_list.add(t);
-						break;
+				switch (cmd) {
+				case "deposit":
+					deposit(Double.parseDouble(param));
+					if (outstanding_collection.remove(t)) {
+						// Was a local command, removed from the outstanding_collection
+					}
+					executed_list.add(t);
+					break;
+				case "addinterest":
+					addInterest(Double.parseDouble(param));
+					if (outstanding_collection.remove(t)) {
+						// Was a local command, removed from the outstanding_collection
+					}
+					executed_list.add(t);
+					break;
 				}
-				
+
 			}
 		}
 
@@ -151,18 +151,22 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
-		System.out.println("recieved something");
 		String val = new String(message.getData());
 		List<Transaction> tempList = new ArrayList<Transaction>();
 		String[] values = val.split(",");
-		for (String e : values) {
-			String[] split = e.split(" ");
-			Transaction temp = new Transaction(split[0]+" "+split[1], split[2]);
-			if (!executed_list.contains(temp)) {
-				tempList.add(temp);
+		if (values[0].equals("State")) {
+			this.balance = Double.parseDouble(values[1]);
+			groupMembers.add(message.getSender());
+		} else {
+			for (String e : values) {
+				String[] split = e.split(" ");
+				Transaction temp = new Transaction(split[0] + " " + split[1], split[2]);
+				if (!executed_list.contains(temp)) {
+					tempList.add(temp);
+				}
 			}
+			processTransactions(tempList);
 		}
-		processTransactions(tempList);
 	}
 
 	@Override
@@ -179,19 +183,19 @@ public class Client implements IClient, AdvancedMessageListener {
 				// available)
 			} else {
 				// Client has executed transactions, send the state to the joined member
-				if (order_counter != 0) {
-					SpreadMessage msg = new SpreadMessage();
-					byte[] data = new String("State " + Double.toString(balance)).getBytes();
-					msg.setData(data);
-					msg.setSafe();
-					msg.addGroup(joined);
-					try {
-						connection.multicast(msg);
-					} catch (SpreadException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+
+				SpreadMessage msg = new SpreadMessage();
+				byte[] data = new String("State," + Double.toString(balance)).getBytes();
+				msg.setData(data);
+				msg.setSafe();
+				msg.addGroup(joined);
+				try {
+					connection.multicast(msg);
+				} catch (SpreadException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
+
 			}
 		} else if (info.isCausedByLeave() || info.isCausedByDisconnect()) {
 			SpreadGroup left = info.getLeft();
@@ -229,11 +233,9 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void Disconnect() {
-		System.out.println("Disconnecting");
 		try {
 			connection.disconnect();
 		} catch (SpreadException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		System.out.println("Disconnection complete");
@@ -251,8 +253,9 @@ public class Client implements IClient, AdvancedMessageListener {
 					String input = bufferedReader.readLine().toLowerCase();
 					if (input.contains("deposit") || input.contains("addinterest")) {
 						String[] split = input.split(" ");
-						if(split.length == 2 &&(split[0].equals("deposit") || split[0].equals("addinterest")) && isNumber(split[1]))
-						addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+						if (split.length == 2 && (split[0].equals("deposit") || split[0].equals("addinterest"))
+								&& isNumber(split[1]))
+							addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
 					} else {
 						localCommands(input);
 					}
@@ -267,7 +270,7 @@ public class Client implements IClient, AdvancedMessageListener {
 	private boolean isNumber(String string) {
 		boolean check = true;
 		for (char c : string.toCharArray()) {
-			if(!Character.isDigit(c))
+			if (!Character.isDigit(c))
 				check = false;
 		}
 		return check;
@@ -312,8 +315,8 @@ public class Client implements IClient, AdvancedMessageListener {
 				data = data + e.toString() + ",";
 			}
 			msg.setData(data.getBytes());
-			if(!data.isEmpty()) //for test
-			connection.multicast(msg);
+			if (!data.isEmpty()) // for test
+				connection.multicast(msg);
 		} catch (SpreadException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
