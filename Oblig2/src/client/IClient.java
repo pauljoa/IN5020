@@ -7,7 +7,7 @@ import spread.SpreadGroup;
 public interface IClient {
 	
 	public double balance();
-	public void deposit(int amount);
+	public void deposit(double amount);
 	public void addInterest(double percent);
 	public List<Transaction> getHistory();
 	public void cleanHistory();
