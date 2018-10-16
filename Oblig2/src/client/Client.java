@@ -1,5 +1,6 @@
 package client;
 
+import java.io.InterruptedIOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -114,7 +115,6 @@ public class Client implements IClient, AdvancedMessageListener {
 			groupMembers.remove(message.getSender().toString());
 			numberOfMembers = numberOfMembers - 1;
 		}
-	
 	}
 
 	@Override
@@ -137,12 +137,12 @@ public class Client implements IClient, AdvancedMessageListener {
 		try {
 			InetAddress tmp = InetAddress.getByName(args[0]);
 			connection = new SpreadConnection();
-			connection.connect(InetAddress.getByName(args[0]), port, privateName.toString(), false, false);
+			connection.connect(InetAddress.getByName(args[0]), port, privateName.toString(), false, true);
 			connection.add(this);
 			group = new SpreadGroup();
 			group.join(connection, args[1]);
-			
 			int nReplicas = Integer.parseInt(args[2]);
+			//Do nothing before start
 			while(numberOfMembers < nReplicas) {
 				
 			}
