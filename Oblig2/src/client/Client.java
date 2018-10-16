@@ -41,6 +41,8 @@ public class Client implements IClient, AdvancedMessageListener {
 		Connect(args);
 		state = State.Running;
 		// Main loop, after connection has been made
+		System.out.println(outstanding_collection.size());
+
 		while (state != State.Exiting) {
 			Input();
 			Send();
@@ -149,26 +151,22 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
+		System.out.println("recieved something");
 		String val = new String(message.getData());
 		List<Transaction> tempList = new ArrayList<Transaction>();
 		String[] values = val.split(",");
-		System.out.println(val);
 		for (String e : values) {
-			System.out.println(e);
-			String[] split = e.split(".");
-			System.out.println(split[0] + " " + split[1]);
-			Transaction temp = new Transaction(split[0], split[1]);
+			String[] split = e.split(" ");
+			Transaction temp = new Transaction(split[0]+" "+split[1], split[2]);
 			if (!executed_list.contains(temp)) {
 				tempList.add(temp);
 			}
 		}
-		// processTransactions(tempList);
-		// executed_list.addAll(tempList);
+		processTransactions(tempList);
 	}
 
 	@Override
 	public void membershipMessageReceived(SpreadMessage message) {
-		System.out.println("membership received");
 		MembershipInfo info = message.getMembershipInfo();
 		int length = info.getMembers().length;
 		// adds the new member to the group, including this replica
@@ -247,11 +245,9 @@ public class Client implements IClient, AdvancedMessageListener {
 		InputStreamReader fileInputStream = new InputStreamReader(System.in);
 		BufferedReader bufferedReader = new BufferedReader(fileInputStream);
 		int time = (int) System.currentTimeMillis() + 10000; // set to + 10 seconds
-		System.out.println("gått 10 sec");
 		try {
 			while ((int) System.currentTimeMillis() < time) {
 				if (bufferedReader.ready()) {
-					System.out.println("ready input");
 					String input = bufferedReader.readLine().toLowerCase();
 					if (input.contains("deposit") || input.contains("addinterest")) {
 						String[] split = input.split(" ");
@@ -316,6 +312,7 @@ public class Client implements IClient, AdvancedMessageListener {
 				data = data + e.toString() + ",";
 			}
 			msg.setData(data.getBytes());
+			if(!data.isEmpty()) //for test
 			connection.multicast(msg);
 		} catch (SpreadException e) {
 			// TODO Auto-generated catch block

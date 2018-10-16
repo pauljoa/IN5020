@@ -16,7 +16,7 @@ public class Transaction {
 		
 	}
 	public String toString() {
-		return command +"."+unique_id;
+		return command +" "+unique_id;
 	}
 	public String getCommand() {
 		return command;
