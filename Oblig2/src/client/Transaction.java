@@ -8,6 +8,9 @@ public class Transaction {
 		unique_id = id;
 	}
 	public String toString() {
-		return command +unique_id;
+		return command +"."+unique_id;
+	}
+	public String getCommand() {
+		return command;
 	}
 }

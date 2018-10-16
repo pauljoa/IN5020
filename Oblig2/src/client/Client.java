@@ -70,6 +70,14 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	}
 
+	public List<Transaction> getExecutedList() {
+		return executed_list;
+	}
+
+	public Collection<Transaction> getOutstandingCollection() {
+		return outstanding_collection;
+	}
+
 	@Override
 	public List<Transaction> getHistory() {
 		// TODO Auto-generated method stub
@@ -115,10 +123,21 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void regularMessageReceived(SpreadMessage message) {
-
 		String val = new String(message.getData());
+		List<Transaction> tempList = new ArrayList<Transaction>();
+		String[] values = val.split(",");
 		System.out.println(val);
-		int tmp = 10;
+		for (String e : values) {
+			System.out.println(e);
+			String[] split = e.split(".");
+			System.out.println(split[0] + " " + split[1]);
+			Transaction temp = new Transaction(split[0], split[1]);
+			if (!executed_list.contains(temp)) {
+				tempList.add(temp);
+			}
+		}
+		// processTransactions(tempList);
+		// executed_list.addAll(tempList);
 	}
 
 	@Override
@@ -155,7 +174,6 @@ public class Client implements IClient, AdvancedMessageListener {
 			groupMembers.remove(left);
 		}
 		this.numberOfMembers = length;
-		System.out.println("members: " + numberOfMembers);
 	}
 
 	@Override
@@ -171,7 +189,7 @@ public class Client implements IClient, AdvancedMessageListener {
 			int nReplicas = Integer.parseInt(args[2]);
 			// Do nothing before start
 			while (numberOfMembers < nReplicas) {
-				System.out.println(numberOfMembers + "  " + nReplicas);
+				System.out.print("");
 			}
 		} catch (SpreadException se) {
 			System.out.println("Error on Spread connection: " + se.getMessage());
@@ -208,14 +226,57 @@ public class Client implements IClient, AdvancedMessageListener {
 			while ((int) System.currentTimeMillis() < time) {
 				if (bufferedReader.ready()) {
 					System.out.println("ready input");
-					String input = bufferedReader.readLine();
-					addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+					String input = bufferedReader.readLine().toLowerCase();
+					if (input.contains("deposit") || input.contains("addinterest")) {
+						String[] split = input.split(" ");
+						if(split.length == 2 &&(split[0].equals("deposit") || split[0].equals("addinterest")) && isNumber(split[1]))
+						addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+					} else {
+						localCommands(input);
+					}
 				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private boolean isNumber(String string) {
+		boolean check = true;
+		for (char c : string.toCharArray()) {
+			if(!Character.isDigit(c))
+				check = false;
+		}
+		return check;
+	}
+
+	private void localCommands(String input) {
+		if (input.equals("balance"))
+			System.out.println(balance());
+		else if (input.equals("gethistory")) {
+			System.out.println("Executed list:");
+			for (Transaction trans : getExecutedList()) {
+				System.out.println(trans.getCommand());
+			}
+			System.out.println("Outstanding list:");
+			for (Transaction trans : getOutstandingCollection()) {
+				System.out.println(trans.getCommand());
+			}
+		} else if (input.equals("cleanhistory"))
+			cleanHistory();
+		else if (input.equals("memberinfo")) {
+			System.out.println("Members of this group");
+			for (SpreadGroup group : memberInfo()) {
+				System.out.println(group.toString());
+			}
+		} else if (input.contains("sleep")) {
+			String[] split = input.split(" ");
+			sleep(Integer.parseInt(split[1]) * 1000);
+		} else if (input.equals("exit"))
+			exit();
+		else
+			System.out.println("Nope");
 	}
 
 	@Override
@@ -228,8 +289,8 @@ public class Client implements IClient, AdvancedMessageListener {
 			for (Transaction e : outstanding_collection) {
 				data = data + e.toString() + ",";
 			}
-		msg.setData(data.getBytes());	
-		connection.multicast(msg);
+			msg.setData(data.getBytes());
+			connection.multicast(msg);
 		} catch (SpreadException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
