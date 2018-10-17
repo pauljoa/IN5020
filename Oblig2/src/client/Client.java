@@ -40,7 +40,7 @@ public class Client implements IClient, AdvancedMessageListener {
 		state = State.Connecting;
 		Connect(args);
 		state = State.Running;
-		//Main loop, after connection has been made			
+		// Main loop, after connection has been made
 		System.out.println(outstanding_collection.size());
 
 		while (state != State.Exiting) {
@@ -153,19 +153,16 @@ public class Client implements IClient, AdvancedMessageListener {
 		String val = new String(message.getData());
 		List<Transaction> tempList = new ArrayList<Transaction>();
 		String[] values = val.split(",");
-		if (values[0].equals("State")) {
-			this.balance = Double.parseDouble(values[1]);
-			groupMembers.add(message.getSender());
-		} else {
-			for (String e : values) {
-				String[] split = e.split(" ");
-				Transaction temp = new Transaction(split[0] + " " + split[1], split[2]);
-				if (!executed_list.contains(temp)) {
-					tempList.add(temp);
-				}
+
+		for (String e : values) {
+			String[] split = e.split(" ");
+			Transaction temp = new Transaction(split[0] + " " + split[1], split[2]);
+			if (!executed_list.contains(temp)) {
+				tempList.add(temp);
 			}
-			processTransactions(tempList);
 		}
+		processTransactions(tempList);
+
 	}
 
 	@Override
@@ -182,19 +179,19 @@ public class Client implements IClient, AdvancedMessageListener {
 				// available)
 			} else {
 				// Client has executed transactions, send the state to the joined member
-
-				SpreadMessage msg = new SpreadMessage();
-				byte[] data = new String("State," + Double.toString(balance)).getBytes();
-				msg.setData(data);
-				msg.setSafe();
-				msg.addGroup(joined);
-				try {
-					connection.multicast(msg);
-				} catch (SpreadException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
+				if (order_counter != 0) {
+					SpreadMessage msg = new SpreadMessage();
+					byte[] data = new String("State " + Double.toString(balance)).getBytes();
+					msg.setData(data);
+					msg.setSafe();
+					msg.addGroup(joined);
+					try {
+						connection.multicast(msg);
+					} catch (SpreadException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 				}
-
 			}
 		} else if (info.isCausedByLeave() || info.isCausedByDisconnect()) {
 			SpreadGroup left = info.getLeft();
@@ -215,7 +212,8 @@ public class Client implements IClient, AdvancedMessageListener {
 			group.join(connection, args[1]);
 			int nReplicas = Integer.parseInt(args[2]);
 			// Do nothing before start
-			while (numberOfMembers < nReplicas);
+			while (numberOfMembers < nReplicas)
+				;
 		} catch (SpreadException se) {
 			System.out.println("Error on Spread connection: " + se.getMessage());
 			se.printStackTrace(System.out);
