@@ -215,9 +215,7 @@ public class Client implements IClient, AdvancedMessageListener {
 			group.join(connection, args[1]);
 			int nReplicas = Integer.parseInt(args[2]);
 			// Do nothing before start
-			while (numberOfMembers < nReplicas) {
-				System.out.print("");
-			}
+			while (numberOfMembers < nReplicas);
 		} catch (SpreadException se) {
 			System.out.println("Error on Spread connection: " + se.getMessage());
 			se.printStackTrace(System.out);
