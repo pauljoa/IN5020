@@ -38,8 +38,11 @@ public class Client implements IClient, AdvancedMessageListener {
 	public Client(String[] args) {
 		groupMembers = new ArrayList<SpreadGroup>();
 		state = State.Connecting;
+		System.out.println("Connecting");
 		Connect(args);
+		System.out.println("Connected");
 		state = State.Running;
+		showCommands();
 		// Main loop, after connection has been made
 		while (state != State.Exiting) {
 			Input();
@@ -128,6 +131,7 @@ public class Client implements IClient, AdvancedMessageListener {
 						// Was a local command, removed from the outstanding_collection
 					}
 					executed_list.add(t);
+					order_counter++;
 					break;
 				case "addinterest":
 					addInterest(Double.parseDouble(param));
@@ -135,6 +139,7 @@ public class Client implements IClient, AdvancedMessageListener {
 						// Was a local command, removed from the outstanding_collection
 					}
 					executed_list.add(t);
+					order_counter++;
 					break;
 				}
 
@@ -290,8 +295,6 @@ public class Client implements IClient, AdvancedMessageListener {
 		System.out.println("memberinfo");
 		System.out.println("sleep <seconds>");
 		System.out.println("exit");
-
-
 	}
 	private void localCommands(String input) {
 		if (input.equals("balance"))
