@@ -148,7 +148,8 @@ public class Client implements IClient, AdvancedMessageListener {
 		String val = new String(message.getData());
 		List<Transaction> tempList = new ArrayList<Transaction>();
 		String[] values = val.split(",");
-        if (values[0].equals("State")) {
+		String[] state = val.split(" ");
+        if (state[0].equals("State")) {
             this.balance = Double.parseDouble(values[1]);
         } 
         else {
