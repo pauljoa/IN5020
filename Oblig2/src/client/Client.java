@@ -300,8 +300,9 @@ public class Client implements IClient, AdvancedMessageListener {
 			System.out.println(balance());
 		else if (input.equals("gethistory")) {
 			System.out.println("Executed list:");
+			int counter = order_counter - getExecutedList().size();
 			for (Transaction trans : getExecutedList()) {
-				System.out.println(trans.getCommand());
+				System.out.println(counter + ". " +trans.getCommand());
 			}
 			System.out.println("Outstanding list:");
 			for (Transaction trans : getOutstandingCollection()) {
