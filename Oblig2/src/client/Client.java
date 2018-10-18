@@ -167,7 +167,6 @@ public class Client implements IClient, AdvancedMessageListener {
 			}
         }
 		processTransactions(tempList);
-
 	}
 
 	@Override
