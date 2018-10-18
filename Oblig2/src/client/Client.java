@@ -155,7 +155,7 @@ public class Client implements IClient, AdvancedMessageListener {
 		String[] values = val.split(",");
 		String[] state = val.split(" ");
         if (state[0].equals("State")) {
-            this.balance = Double.parseDouble(values[1]);
+            this.balance = Double.parseDouble(state[1]);
         } 
         else {
 			for (String e : values) {
@@ -167,7 +167,6 @@ public class Client implements IClient, AdvancedMessageListener {
 			}
         }
 		processTransactions(tempList);
-
 	}
 
 	@Override
