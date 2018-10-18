@@ -1,9 +1,14 @@
 package client;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.InterruptedIOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -34,6 +39,8 @@ public class Client implements IClient, AdvancedMessageListener {
 	public int port = 8080;
 	public List<SpreadGroup> groupMembers;
 	ArrayList<String> toDoList = new ArrayList<String>();
+	public String inputPath = null;
+	public int currentLine = 0;
 
 	public Client(String[] args) {
 		groupMembers = new ArrayList<SpreadGroup>();
@@ -43,6 +50,9 @@ public class Client implements IClient, AdvancedMessageListener {
 		System.out.println("Connected");
 		state = State.Running;
 		showCommands();
+		
+		if(args.length > 3)
+			inputPath = args[3];
 		// Main loop, after connection has been made
 		while (state != State.Exiting) {
 			Input();
@@ -254,26 +264,55 @@ public class Client implements IClient, AdvancedMessageListener {
 
 	@Override
 	public void Input() {
-		InputStreamReader fileInputStream = new InputStreamReader(System.in);
-		BufferedReader bufferedReader = new BufferedReader(fileInputStream);
-		int time = (int) System.currentTimeMillis() + 10000; // set to + 10 seconds
-		try {
-			while ((int) System.currentTimeMillis() < time) {
-				if (bufferedReader.ready()) {
-					String input = bufferedReader.readLine().toLowerCase();
-					if (input.contains("deposit") || input.contains("addinterest")) {
-						String[] split = input.split(" ");
-						if (split.length == 2 && (split[0].equals("deposit") || split[0].equals("addinterest"))
-								&& isNumber(split[1]))
-							addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
-					} else {
-						localCommands(input);
+		if(inputPath == null) {
+			InputStreamReader fileInputStream = new InputStreamReader(System.in);
+			BufferedReader bufferedReader = new BufferedReader(fileInputStream);
+			int time = (int) System.currentTimeMillis() + 10000; // set to + 10 seconds
+			try {
+				while ((int) System.currentTimeMillis() < time) {
+					if (bufferedReader.ready()) {
+						String input = bufferedReader.readLine().toLowerCase();
+						if (input.contains("deposit") || input.contains("addinterest")) {
+							String[] split = input.split(" ");
+							if (split.length == 2 && (split[0].equals("deposit") || split[0].equals("addinterest"))
+									&& isNumber(split[1]))
+								addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+						} else {
+							localCommands(input);
+						}
 					}
 				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		} else {
+			try {
+				File file = new File(inputPath);
+				BufferedReader br = new BufferedReader(new FileReader(file));
+				int time = (int) System.currentTimeMillis() + 10000; // set to + 10 seconds
+				for(int x = 0; x < currentLine; x++){
+					if(br.ready()) {
+						br.readLine();
+					}
+				}
+				while ((int) System.currentTimeMillis() < time) {
+					if(br.ready()) {
+						String input = br.readLine().toLowerCase();
+						currentLine++;
+						if (input.contains("deposit") || input.contains("addinterest")) {
+							String[] split = input.split(" ");
+							if (split.length == 2 && (split[0].equals("deposit") || split[0].equals("addinterest"))
+									&& isNumber(split[1]))
+								addTransaction(new Transaction(input, privateName.toString() + outstanding_counter));
+						} else {
+							localCommands(input);
+						}
+					}
+				}
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
 		}
 	}
 
