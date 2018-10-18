@@ -177,7 +177,6 @@ public class Client implements IClient, AdvancedMessageListener {
 			}
         }
 		processTransactions(tempList);
-
 	}
 
 	@Override
@@ -343,6 +342,7 @@ public class Client implements IClient, AdvancedMessageListener {
 			int counter = order_counter - getExecutedList().size();
 			for (Transaction trans : getExecutedList()) {
 				System.out.println(counter + ". " +trans.getCommand());
+				counter++;
 			}
 			System.out.println("Outstanding list:");
 			for (Transaction trans : getOutstandingCollection()) {
