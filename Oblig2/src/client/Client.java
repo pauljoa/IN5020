@@ -45,7 +45,7 @@ public class Client implements IClient, AdvancedMessageListener {
 			Input();
 			Send();
 		}
-		//Disconnect();
+		Disconnect();
 		System.out.println("Exiting");
 		return;
 	}
@@ -237,6 +237,7 @@ public class Client implements IClient, AdvancedMessageListener {
 	@Override
 	public void Disconnect() {
 		try {
+			connection.remove(this);
 			connection.disconnect();
 		} catch (SpreadException e) {
 			e.printStackTrace();
