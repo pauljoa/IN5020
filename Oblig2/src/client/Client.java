@@ -270,7 +270,19 @@ public class Client implements IClient, AdvancedMessageListener {
 		}
 		return check;
 	}
+	public void showCommands() {
+		System.out.println("AVAILABLE COMMANDS:");
+		System.out.println("deposit <number>");
+		System.out.println("addinterest <number>");
+		System.out.println("balance");
+		System.out.println("gethistory");
+		System.out.println("cleanhistory");
+		System.out.println("memberinfo");
+		System.out.println("sleep <seconds>");
+		System.out.println("exit");
 
+
+	}
 	private void localCommands(String input) {
 		if (input.equals("balance"))
 			System.out.println(balance());
