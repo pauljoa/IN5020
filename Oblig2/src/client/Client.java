@@ -273,7 +273,6 @@ public class Client implements IClient, AdvancedMessageListener {
 	private boolean isNumber(String string) {
 		boolean check = true;
 		for (char c : string.toCharArray()) {
-			System.out.println(c);
 			if (!Character.isDigit(c) && c != '-' && c != '.')
 				check = false;
 		}
