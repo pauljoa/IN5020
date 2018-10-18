@@ -41,16 +41,11 @@ public class Client implements IClient, AdvancedMessageListener {
 		Connect(args);
 		state = State.Running;
 		// Main loop, after connection has been made
-		System.out.println(outstanding_collection.size());
-
 		while (state != State.Exiting) {
 			Input();
 			Send();
-			// Input function
-
-			// Send function
 		}
-		Disconnect();
+		//Disconnect();
 		System.out.println("Exiting");
 		return;
 	}
@@ -153,14 +148,18 @@ public class Client implements IClient, AdvancedMessageListener {
 		String val = new String(message.getData());
 		List<Transaction> tempList = new ArrayList<Transaction>();
 		String[] values = val.split(",");
-
-		for (String e : values) {
-			String[] split = e.split(" ");
-			Transaction temp = new Transaction(split[0] + " " + split[1], split[2]);
-			if (!executed_list.contains(temp)) {
-				tempList.add(temp);
+        if (values[0].equals("State")) {
+            this.balance = Double.parseDouble(values[1]);
+        } 
+        else {
+			for (String e : values) {
+				String[] split = e.split(" ");
+				Transaction temp = new Transaction(split[0] + " " + split[1], split[2]);
+				if (!executed_list.contains(temp)) {
+					tempList.add(temp);
+				}
 			}
-		}
+        }
 		processTransactions(tempList);
 
 	}
@@ -175,6 +174,15 @@ public class Client implements IClient, AdvancedMessageListener {
 			groupMembers.add(joined);
 			// Check if the joined member is itself, TODO: Remove ! for testing purposes
 			if (connection.getPrivateGroup().equals(joined)) {
+				SpreadGroup[] members = info.getMembers();
+				for(int i = 0;i<members.length;i++) {
+					if(groupMembers.contains(members[i])) {
+						//Do not add member again
+					}
+					else {
+						groupMembers.add(members[i]);
+					}
+				}
 				// Do nothing, as a state update will be sent by the other replicas (If
 				// available)
 			} else {
@@ -296,7 +304,7 @@ public class Client implements IClient, AdvancedMessageListener {
 		} else if (input.equals("exit"))
 			exit();
 		else
-			System.out.println("Nope");
+			System.out.println("Command not valid");
 	}
 
 	@Override
