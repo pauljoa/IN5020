@@ -147,11 +147,41 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		switch (message.getType()) {
 		// If the message is a shuffle request:
 		case SHUFFLE_REQUEST:
-			if(state == State.Ready) {
-				
-			}
-			else {
-				
+			if (state == State.Ready) {
+				List<Entry> subset = new ArrayList<Entry>();
+				while (subset.size() < l - 1) {
+					Entry next = cache.get(CommonState.r.nextInt(cache.size()));
+					if (!subset.contains(next)) {
+						subset.add(next);
+					}
+				}
+				// Send its own neighbors
+				sent = new ArrayList<Entry>(subset);
+				GossipMessage sendMessage = new GossipMessage(node, subset);
+				sendMessage.setType(MessageType.SHUFFLE_REPLY);
+				Transport tr = (Transport) node.getProtocol(pid);
+				tr.send(node, message.getNode(), sendMessage, pid);
+
+				// update its own neighbors
+				for (Entry e : message.getShuffleList()) {
+					if(cache.contains(e)) {
+						
+					}
+					else {
+						if(cache.size() == size) {
+							Entry remove = sent.get(CommonState.r.nextInt(cache.size()));
+							sent.remove(remove);
+							cache.remove(remove);
+						}
+						cache.add(e);
+					}
+				}
+
+			} else {
+				GossipMessage rejectMessage = new GossipMessage(node, new ArrayList<Entry>());
+				rejectMessage.setType(MessageType.SHUFFLE_REJECTED);
+				Transport tr = (Transport) node.getProtocol(pid);
+				tr.send(node, message.getNode(), rejectMessage, pid);
 			}
 		//	  1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
 		//	  2. Q selects a random subset of size l of its own neighbors; 
