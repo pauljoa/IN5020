@@ -94,11 +94,16 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		if(cache.size() == 0) {
 			return;
 		}
+		if(Math.ceil(Math.random() * 100) > 50) {
+			return;
+		}
+		boolean qRemoved = false;
 		// 3. Select a random neighbor (named Q) from P's cache to initiate the shuffling;
 		//	  - You should use the simulator's common random source to produce a random number: CommonState.r.nextInt(cache.size())
 		Entry Q = cache.get(CommonState.r.nextInt(cache.size()));
 		// 4. If P's cache is full, remove Q from the cache;	
 		if(cache.size() == size)  {
+			qRemoved = true;
 			if(!cache.remove(Q)) {
 				System.out.println("ERROR WHILE REMOVING Q");
 			}
@@ -107,10 +112,18 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
 		//    - Do not add Q to this subset	
-		while(subset.size() > l-1) {
+		while((subset.size() < l-1)) {
 			Entry next = cache.get(CommonState.r.nextInt(cache.size()));
-			if(next.equals(Q) && !subset.contains(next)) {
+			if(!next.equals(Q) && !subset.contains(next)) {
 				subset.add(next);
+			}
+			else {
+				if(cache.size() == 1 && next.equals(Q)) {
+					break;
+				}
+				if(!qRemoved && subset.size() ==cache.size()-1) {
+					break;
+				}
 			}
 		}
 		// 6. Add P to the subset;
@@ -118,7 +131,6 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		sent = new ArrayList<Entry>(subset);
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
-		//	  - Example code for sending a message:
 		//
 		GossipMessage message = new GossipMessage(node, subset);
 		message.setType(MessageType.SHUFFLE_REQUEST);
@@ -147,29 +159,42 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		switch (message.getType()) {
 		// If the message is a shuffle request:
 		case SHUFFLE_REQUEST:
-			if (state == State.Ready) {
+			//1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
+			if (true) {
 				List<Entry> subset = new ArrayList<Entry>();
-				while (subset.size() < l - 1) {
+				//2. Q selects a random subset of size l of its own neighbors;
+				while (subset.size() < l) {
+					if(cache.size() == 0) {
+						break;
+					}
 					Entry next = cache.get(CommonState.r.nextInt(cache.size()));
 					if (!subset.contains(next)) {
 						subset.add(next);
 					}
+					else if(cache.size() == subset.size()) {
+						break;
+					}
 				}
-				// Send its own neighbors
+				//	3. Q reply P's shuffle request by sending back its own subset;
 				sent = new ArrayList<Entry>(subset);
 				GossipMessage sendMessage = new GossipMessage(node, subset);
 				sendMessage.setType(MessageType.SHUFFLE_REPLY);
-				Transport tr = (Transport) node.getProtocol(pid);
+				Transport tr = (Transport) node.getProtocol(tid);
 				tr.send(node, message.getNode(), sendMessage, pid);
+				state = State.Waiting;
 
-				// update its own neighbors
+				 
+				//	  4. Q updates its cache to include the neighbors sent by P:
+				//		 - No neighbor appears twice in the cache
+				//		 - Use empty cache slots to add the new entries
+				//		 - If the cache is full, you can replace entries among the ones sent to P with the new ones
 				for (Entry e : message.getShuffleList()) {
 					if(cache.contains(e)) {
 						
 					}
 					else {
 						if(cache.size() == size) {
-							Entry remove = sent.get(CommonState.r.nextInt(cache.size()));
+							Entry remove = sent.get(CommonState.r.nextInt(sent.size()));
 							sent.remove(remove);
 							cache.remove(remove);
 						}
@@ -180,16 +205,9 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			} else {
 				GossipMessage rejectMessage = new GossipMessage(node, new ArrayList<Entry>());
 				rejectMessage.setType(MessageType.SHUFFLE_REJECTED);
-				Transport tr = (Transport) node.getProtocol(pid);
+				Transport tr = (Transport) node.getProtocol(tid);
 				tr.send(node, message.getNode(), rejectMessage, pid);
 			}
-		//	  1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
-		//	  2. Q selects a random subset of size l of its own neighbors; 
-		//	  3. Q reply P's shuffle request by sending back its own subset;
-		//	  4. Q updates its cache to include the neighbors sent by P:
-		//		 - No neighbor appears twice in the cache
-		//		 - Use empty cache slots to add the new entries
-		//		 - If the cache is full, you can replace entries among the ones sent to P with the new ones
 			break;
 		
 		// If the message is a shuffle reply:
@@ -207,7 +225,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				}
 				else {
 					if(cache.size() == size) {
-						Entry remove = sent.get(CommonState.r.nextInt(cache.size()));
+						Entry remove = sent.get(CommonState.r.nextInt(sent.size()));
 						sent.remove(remove);
 						cache.remove(remove);
 					}
@@ -223,7 +241,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
 			Entry Q = new Entry(node);
-//			  1. If P was originally removed from Q's cache, add it again to the cache.
+			//1. If P was originally removed from Q's cache, add it again to the cache.
 			if(cache.contains(Q)) {
 				
 			}
