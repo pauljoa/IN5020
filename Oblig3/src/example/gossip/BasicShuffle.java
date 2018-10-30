@@ -5,6 +5,7 @@ import java.util.List;
 
 import peersim.cdsim.CDProtocol;
 import peersim.config.Configuration;
+import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
@@ -50,6 +51,8 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	// The maximum length of the shuffle exchange;
 	private final int l;
 	
+	private static State state = State.Ready; 
+	
 	/**
 	 * Constructor that initializes the relevant simulation parameters and
 	 * other class variables.
@@ -61,6 +64,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		this.l = Configuration.getInt(n + "." + PAR_L);
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
+		this.state = State.Ready;
 
 		cache = new ArrayList<Entry>(size);
 	}
@@ -79,12 +83,35 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// Implement the shuffling protocol using the following steps (or
 		// you can design a similar algorithm):
 		// Let's name this node as P
-		
 		// 1. If P is waiting for a response from a shuffling operation initiated in a previous cycle, return;
-		// 2. If P's cache is empty, return;		
+		if(state == State.Waiting) {
+			
+			return;
+			
+		}
+		// 2. If P's cache is empty, return;	
+		if(cache.size() == 0) {
+			return;
+		}
+		
 		// 3. Select a random neighbor (named Q) from P's cache to initiate the shuffling;
 		//	  - You should use the simulator's common random source to produce a random number: CommonState.r.nextInt(cache.size())
-		// 4. If P's cache is full, remove Q from the cache;
+		Entry neighbour = cache.get(CommonState.r.nextInt(cache.size()));
+		
+		// 4. If P's cache is full, remove Q from the cache;	
+		if(cache.size() == size)  {
+			if(!cache.remove(neighbour)) {
+				System.out.println("ERROR WHILE REMOVING Q");
+			}
+		}
+		
+		List<Entry> subset = new ArrayList<Entry>();
+		while(subset.size() > l-1) {
+			Entry next = cache.get(CommonState.r.nextInt(cache.size()));
+			if(next == neighbour) {
+				
+			}
+		}
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
 		//    - Do not add Q to this subset	
@@ -121,6 +148,12 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		switch (message.getType()) {
 		// If the message is a shuffle request:
 		case SHUFFLE_REQUEST:
+			if(state == State.Ready) {
+				
+			}
+			else {
+				
+			}
 		//	  1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
 		//	  2. Q selects a random subset of size l of its own neighbors; 
 		//	  3. Q reply P's shuffle request by sending back its own subset;
