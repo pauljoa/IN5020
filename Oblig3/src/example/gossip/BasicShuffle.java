@@ -164,20 +164,45 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		
 		// If the message is a shuffle reply:
 		case SHUFFLE_REPLY:
-		//	  1. In this case Q initiated a shuffle with P and is receiving a response containing a subset of P's neighbors
-		//	  2. Q updates its cache to include the neighbors sent by P:
+			if(state != State.Waiting) {
+				//This should not be possible,
+				System.out.println("State != Waiting in Shuffle_REPLY message");
+			}
+			//	  1. In this case Q initiated a shuffle with P and is receiving a response containing a subset of P's neighbors
+			List<Entry> shuffleList = message.getShuffleList();
+			//	  2. Q updates its cache to include the neighbors sent by P:
+			for (Entry e : shuffleList) {
+				if(cache.contains(e)) {
+					
+				}
+				else {
+					if(cache.size() == size) {
+						Entry remove = sent.get(CommonState.r.nextInt(cache.size()));
+						sent.remove(remove);
+						cache.remove(remove);
+					}
+					cache.add(e);
+				}
+			}
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add new entries
 		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
 		//	  3. Q is no longer waiting for a shuffle reply;	 
+			state = State.Ready;
 			break;
-		
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
-		//	  1. If P was originally removed from Q's cache, add it again to the cache.
-		//	  2. Q is no longer waiting for a shuffle reply;
+			Entry Q = new Entry(node);
+//			  1. If P was originally removed from Q's cache, add it again to the cache.
+			if(cache.contains(Q)) {
+				
+			}
+			else {
+				cache.add(Q);
+			}
+			//	  2. Q is no longer waiting for a shuffle reply;
+			state = State.Ready;
 			break;
-			
 		default:
 			break;
 		}
