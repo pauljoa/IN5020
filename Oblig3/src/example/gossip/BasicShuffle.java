@@ -9,6 +9,7 @@ import peersim.core.CommonState;
 import peersim.core.Linkable;
 import peersim.core.Node;
 import peersim.edsim.EDProtocol;
+import peersim.transport.Transport;
 
 
 /**
@@ -52,6 +53,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	private final int l;
 	
 	private static State state = State.Ready; 
+	private static List<Entry> sent;
 	
 	/**
 	 * Constructor that initializes the relevant simulation parameters and
@@ -84,49 +86,46 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// you can design a similar algorithm):
 		// Let's name this node as P
 		// 1. If P is waiting for a response from a shuffling operation initiated in a previous cycle, return;
+		Entry P = new Entry(node);
 		if(state == State.Waiting) {
-			
 			return;
-			
 		}
 		// 2. If P's cache is empty, return;	
 		if(cache.size() == 0) {
 			return;
 		}
-		
 		// 3. Select a random neighbor (named Q) from P's cache to initiate the shuffling;
 		//	  - You should use the simulator's common random source to produce a random number: CommonState.r.nextInt(cache.size())
-		Entry neighbour = cache.get(CommonState.r.nextInt(cache.size()));
-		
+		Entry Q = cache.get(CommonState.r.nextInt(cache.size()));
 		// 4. If P's cache is full, remove Q from the cache;	
 		if(cache.size() == size)  {
-			if(!cache.remove(neighbour)) {
+			if(!cache.remove(Q)) {
 				System.out.println("ERROR WHILE REMOVING Q");
 			}
 		}
-		
 		List<Entry> subset = new ArrayList<Entry>();
-		while(subset.size() > l-1) {
-			Entry next = cache.get(CommonState.r.nextInt(cache.size()));
-			if(next == neighbour) {
-				
-			}
-		}
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
 		//    - Do not add Q to this subset	
+		while(subset.size() > l-1) {
+			Entry next = cache.get(CommonState.r.nextInt(cache.size()));
+			if(next.equals(Q) && !subset.contains(next)) {
+				subset.add(next);
+			}
+		}
 		// 6. Add P to the subset;
+		subset.add(P);
+		sent = new ArrayList<Entry>(subset);
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
 		//	  - Example code for sending a message:
 		//
-		// GossipMessage message = new GossipMessage(node, subset);
-		// message.setType(MessageType.SHUFFLE_REQUEST);
-		// Transport tr = (Transport) node.getProtocol(tid);
-		// tr.send(node, Q.getNode(), message, protocolID);
-		//
+		GossipMessage message = new GossipMessage(node, subset);
+		message.setType(MessageType.SHUFFLE_REQUEST);
+		Transport tr = (Transport) node.getProtocol(tid);
+		tr.send(node, Q.getNode(), message, protocolID);
 		// 8. From this point on P is waiting for Q's response and will not initiate a new shuffle operation;
-		//
+		state = State.Waiting;
 		// The response from Q will be handled by the method processEvent.
 		
 	}
