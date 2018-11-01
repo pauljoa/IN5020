@@ -173,7 +173,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 						
 					}
 					else {
-						if(cache.size() == size) {
+						if(cache.size() >= size) {
 							Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
 							cache.remove(remove);
 						}
@@ -203,7 +203,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 					
 				}
 				else {
-					if (cache.size() == size) {
+					if (cache.size() >= size) {
 						if (!sent.isEmpty()) {
 							Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
 							cache.remove(remove);
