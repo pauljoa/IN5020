@@ -101,7 +101,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 
 		Entry Q = cacheTemp.remove(CommonState.r.nextInt(cacheTemp.size()));
 		// 4. If P's cache is full, remove Q from the cache;	
-		if(cache.size() == size)  {
+		if(cache.size() >= size)  {
 			if(!cache.remove(Q)) {
 				System.out.println("ERROR WHILE REMOVING Q");
 			}
@@ -173,11 +173,16 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 						
 					}
 					else {
-						if(cache.size() >= size) {
-							Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
-							cache.remove(remove);
+						if (cache.size() >= size) {
+							if (!sent.isEmpty()) {
+								Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
+								cache.remove(remove);
+								cache.add(e);
+							}
 						}
-						cache.add(e);
+						else {
+							cache.add(e);
+						}
 					}
 				}
 
