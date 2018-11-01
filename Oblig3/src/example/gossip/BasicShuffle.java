@@ -52,7 +52,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 	// The maximum length of the shuffle exchange;
 	private final int l;
 	
-	private static State state = State.Ready; 
+	private boolean waiting;
 	private static List<Entry> sent;
 	
 	/**
@@ -66,7 +66,8 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		this.size = Configuration.getInt(n + "." + PAR_CACHE);
 		this.l = Configuration.getInt(n + "." + PAR_L);
 		this.tid = Configuration.getPid(n + "." + PAR_TRANSPORT);
-		this.state = State.Ready;
+		
+		this.waiting = false;
 
 		cache = new ArrayList<Entry>(size);
 	}
@@ -86,49 +87,36 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// you can design a similar algorithm):
 		// Let's name this node as P
 		// 1. If P is waiting for a response from a shuffling operation initiated in a previous cycle, return;
+		if(waiting) {
+			return;
+		}
 		Entry P = new Entry(node);
-		if(state == State.Waiting) {
-			return;
-		}
 		// 2. If P's cache is empty, return;	
-		if(cache.size() == 0) {
+		if(cache == null || cache.isEmpty()) {
 			return;
 		}
-		if(Math.ceil(Math.random() * 100) > 50) {
-			return;
-		}
-		boolean qRemoved = false;
 		// 3. Select a random neighbor (named Q) from P's cache to initiate the shuffling;
 		//	  - You should use the simulator's common random source to produce a random number: CommonState.r.nextInt(cache.size())
-		Entry Q = cache.get(CommonState.r.nextInt(cache.size()));
+		List<Entry> cacheTemp = new ArrayList<Entry>(cache);
+
+		Entry Q = cacheTemp.remove(CommonState.r.nextInt(cacheTemp.size()));
 		// 4. If P's cache is full, remove Q from the cache;	
 		if(cache.size() == size)  {
-			qRemoved = true;
 			if(!cache.remove(Q)) {
 				System.out.println("ERROR WHILE REMOVING Q");
 			}
 		}
-		List<Entry> subset = new ArrayList<Entry>();
+		List<Entry> subset = new ArrayList<Entry>(l);
 		// 5. Select a subset of other l - 1 random neighbors from P's cache;
 		//	  - l is the length of the shuffle exchange
 		//    - Do not add Q to this subset	
-		while((subset.size() < l-1)) {
-			Entry next = cache.get(CommonState.r.nextInt(cache.size()));
-			if(!next.equals(Q) && !subset.contains(next)) {
-				subset.add(next);
-			}
-			else {
-				if(cache.size() == 1 && next.equals(Q)) {
-					break;
-				}
-				if(!qRemoved && subset.size() ==cache.size()-1) {
-					break;
-				}
-			}
+		while((subset.size() < l-1) && !cacheTemp.isEmpty()) {
+			Entry next = cacheTemp.remove(CommonState.r.nextInt(cacheTemp.size()));
+			subset.add(new Entry(next.getNode()));
 		}
 		// 6. Add P to the subset;
-		subset.add(P);
 		sent = new ArrayList<Entry>(subset);
+		subset.add(P);
 		// 7. Send a shuffle request to Q containing the subset;
 		//	  - Keep track of the nodes sent to Q
 		//
@@ -137,9 +125,8 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		Transport tr = (Transport) node.getProtocol(tid);
 		tr.send(node, Q.getNode(), message, protocolID);
 		// 8. From this point on P is waiting for Q's response and will not initiate a new shuffle operation;
-		state = State.Waiting;
+		waiting = true;
 		// The response from Q will be handled by the method processEvent.
-		
 	}
 
 	/* The simulator engine calls the method processEvent at the specific time unit that an event occurs in the simulation.
@@ -160,20 +147,14 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		// If the message is a shuffle request:
 		case SHUFFLE_REQUEST:
 			//1. If Q is waiting for a response from a shuffling initiated in a previous cycle, send back to P a message rejecting the shuffle request; 
-			if (true) {
+			if (!waiting) {
 				List<Entry> subset = new ArrayList<Entry>();
+				List<Entry> cacheTemp = new ArrayList<Entry>(cache);
 				//2. Q selects a random subset of size l of its own neighbors;
-				while (subset.size() < l) {
-					if(cache.size() == 0) {
-						break;
-					}
-					Entry next = cache.get(CommonState.r.nextInt(cache.size()));
-					if (!subset.contains(next)) {
-						subset.add(next);
-					}
-					else if(cache.size() == subset.size()) {
-						break;
-					}
+				while (subset.size() < l && !cacheTemp.isEmpty()) {
+					Entry next = cacheTemp.remove(CommonState.r.nextInt(cacheTemp.size()));
+					subset.add(next);
+
 				}
 				//	3. Q reply P's shuffle request by sending back its own subset;
 				sent = new ArrayList<Entry>(subset);
@@ -181,7 +162,6 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				sendMessage.setType(MessageType.SHUFFLE_REPLY);
 				Transport tr = (Transport) node.getProtocol(tid);
 				tr.send(node, message.getNode(), sendMessage, pid);
-				state = State.Waiting;
 
 				 
 				//	  4. Q updates its cache to include the neighbors sent by P:
@@ -194,8 +174,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 					}
 					else {
 						if(cache.size() == size) {
-							Entry remove = sent.get(CommonState.r.nextInt(sent.size()));
-							sent.remove(remove);
+							Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
 							cache.remove(remove);
 						}
 						cache.add(e);
@@ -212,7 +191,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		
 		// If the message is a shuffle reply:
 		case SHUFFLE_REPLY:
-			if(state != State.Waiting) {
+			if(!waiting) {
 				//This should not be possible,
 				System.out.println("State != Waiting in Shuffle_REPLY message");
 			}
@@ -224,19 +203,24 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 					
 				}
 				else {
-					if(cache.size() == size) {
-						Entry remove = sent.get(CommonState.r.nextInt(sent.size()));
-						sent.remove(remove);
-						cache.remove(remove);
+					if (cache.size() == size) {
+						if (!sent.isEmpty()) {
+							Entry remove = sent.remove(CommonState.r.nextInt(sent.size()));
+							cache.remove(remove);
+							cache.add(e);
+						}
 					}
-					cache.add(e);
+					else {
+						cache.add(e);
+					}
+					
 				}
 			}
 		//		 - No neighbor appears twice in the cache
 		//		 - Use empty cache slots to add new entries
 		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
 		//	  3. Q is no longer waiting for a shuffle reply;	 
-			state = State.Ready;
+			waiting = false;
 			break;
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
@@ -249,7 +233,7 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 				cache.add(Q);
 			}
 			//	  2. Q is no longer waiting for a shuffle reply;
-			state = State.Ready;
+			waiting = false;
 			break;
 		default:
 			break;
