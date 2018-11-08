@@ -153,6 +153,8 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			if (!waiting) {
 				List<Entry> subset = new ArrayList<Entry>();
 				List<Entry> cacheTemp = new ArrayList<Entry>(cache);
+				
+				cacheTemp.remove(new Entry(P));
 				//2. Q selects a random subset of size l of its own neighbors;
 				while (subset.size() < l && !cacheTemp.isEmpty()) {
 					Entry next = cacheTemp.remove(CommonState.r.nextInt(cacheTemp.size()));
@@ -199,10 +201,14 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 		//		 - If the cache is full, you can replace entries among the ones originally sent to P with the new ones
 		//	  3. Q is no longer waiting for a shuffle reply;	 
 			waiting = false;
+			
+			for (Entry entry : cache) {
+				entry.setSentTo(null);
+			}
 			break;
 		// If the message is a shuffle rejection:
 		case SHUFFLE_REJECTED:
-			Entry Q = new Entry(message.getNode());
+			Entry Q = new Entry(P);
 			for (Entry entry : cache) {
 				entry.setSentTo(null);
 			}
@@ -212,10 +218,11 @@ public class BasicShuffle  implements Linkable, EDProtocol, CDProtocol{
 			}
 			else {
 				cache.add(Q);
+				QRemoved = false;
 			}
 			//	  2. Q is no longer waiting for a shuffle reply;
 			waiting = false;
-			QRemoved = false;
+			
 			break;
 		default:
 			break;
